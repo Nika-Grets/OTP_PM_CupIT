@@ -1,0 +1,2511 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ОТП Банк — Гиперперсонализированная витрина (To-Be)</title>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700;800&family=Unbounded:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0c0e;
+    --surface: #161618;
+    --surface2: #1e1e22;
+    --surface3: #252529;
+    --accent: #c8ff00;
+    --accent-dim: rgba(200,255,0,0.12);
+    --accent-glow: rgba(200,255,0,0.25);
+    --purple: #a855f7;
+    --purple-dim: rgba(168,85,247,0.15);
+    --red: #a855f7; /* mapped to purple */
+    --blue: #a855f7; /* mapped to purple */
+    --orange: #c8ff00; /* mapped to lime */
+    --text: #ffffff;
+    --text2: #9ca3af;
+    --text3: #6b7280;
+    --border: rgba(255,255,255,0.07);
+    --border-accent: rgba(200,255,0,0.3);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --font-display: 'Unbounded', sans-serif;
+    --font-body: 'Onest', sans-serif;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: #070709;
+    font-family: var(--font-body);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    width: 100%;
+    max-width: 960px;
+    padding: 40px 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .page-label {
+    font-family: var(--font-display);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .page-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.5;
+    max-width: 520px;
+  }
+
+  /* ── PERSONA SWITCHER ── */
+  .persona-bar {
+    display: flex;
+    gap: 10px;
+    padding: 0 24px;
+    margin-bottom: 32px;
+  }
+
+  .persona-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 50px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+  }
+
+  .persona-btn .emoji { font-size: 16px; }
+
+  .persona-btn.active {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+    color: var(--accent);
+  }
+
+  .persona-btn:hover:not(.active) {
+    border-color: rgba(255,255,255,0.15);
+    color: var(--text);
+  }
+
+  /* ── MAIN LAYOUT ── */
+  .layout {
+    display: flex;
+    gap: 32px;
+    padding: 0 24px 60px;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 960px;
+  }
+
+  /* ── PHONE FRAME ── */
+  .phone-wrap {
+    flex: 0 0 auto;
+    position: relative;
+  }
+
+  .phone-frame {
+    width: 340px;
+    min-height: 720px;
+    background: var(--bg);
+    border-radius: 44px;
+    border: 2px solid rgba(255,255,255,0.12);
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+      0 0 0 6px #0c0c0e,
+      0 0 60px rgba(0,0,0,0.8),
+      inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+
+  /* Notch */
+  .phone-frame::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 26px;
+    background: #0c0c0e;
+    border-radius: 20px;
+    z-index: 100;
+    border: 1.5px solid rgba(255,255,255,0.1);
+  }
+
+  .phone-inner {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 80px;
+    scrollbar-width: none;
+  }
+  .phone-inner::-webkit-scrollbar { display: none; }
+
+  /* ── STATUS BAR ── */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 54px 20px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .status-icons { display: flex; gap: 5px; align-items: center; }
+  .status-icons svg { opacity: 0.8; }
+
+  /* ── TOP BAR ── */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 20px 12px;
+  }
+
+  .otp-logo {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .otp-logo .dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2.5px solid var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .otp-logo .dot::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .otp-logo span { color: var(--text); }
+  .otp-logo .bold { font-weight: 800; }
+
+  .top-actions {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+  }
+
+  .icon-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.15s;
+    color: var(--text2);
+  }
+
+  .icon-btn:hover { background: var(--surface2); }
+
+  .theme-toggle {
+    display: flex;
+    align-items: center;
+    background: var(--surface2);
+    border-radius: 20px;
+    padding: 2px;
+    gap: 0;
+  }
+
+  .theme-toggle span {
+    font-size: 12px;
+    padding: 3px 5px;
+    border-radius: 14px;
+    cursor: pointer;
+    opacity: 0.5;
+  }
+
+  .theme-toggle span.active {
+    background: var(--surface3);
+    opacity: 1;
+  }
+
+  /* ── BALANCE CARD ── */
+  .balance-card {
+    margin: 8px 16px 16px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 16px;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .balance-card::after {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .balance-label {
+    font-size: 11px;
+    color: var(--text3);
+    font-weight: 500;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .balance-amount {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .balance-amount .currency { color: var(--accent); }
+
+  .eye-btn {
+    cursor: pointer;
+    color: var(--text3);
+    font-size: 14px;
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mir-badge {
+    background: linear-gradient(135deg, #00b4d8, #0077b6);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: white;
+  }
+
+  .card-num {
+    font-size: 12px;
+    color: var(--text3);
+    letter-spacing: 1px;
+  }
+
+  .balance-actions {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .action-icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+
+  .action-icon-btn:hover { background: var(--surface3); border-color: var(--border-accent); }
+
+  /* ── QUICK ACTIONS ── */
+  .quick-actions {
+    display: flex;
+    padding: 4px 16px 16px;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .quick-actions::-webkit-scrollbar { display: none; }
+
+  .qa-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+    cursor: pointer;
+  }
+
+  .qa-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    font-size: 18px;
+    transition: all 0.2s;
+  }
+
+  .qa-circle:hover {
+    background: var(--surface3);
+    border-color: var(--border-accent);
+  }
+
+  .qa-circle.avatar {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text2);
+    background: linear-gradient(135deg, var(--surface2), var(--surface3));
+  }
+
+  .qa-label {
+    font-size: 10px;
+    color: var(--text3);
+    text-align: center;
+    max-width: 56px;
+    line-height: 1.3;
+  }
+
+  .qa-item.plus .qa-circle {
+    border-style: dashed;
+    border-color: var(--text3);
+    color: var(--text3);
+    font-size: 20px;
+  }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 16px 10px;
+  }
+
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .section-action {
+    font-size: 12px;
+    color: var(--accent);
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  /* ── SMART TILES ── */
+  .smart-tile {
+    margin: 0 16px 12px;
+    border-radius: var(--radius);
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .smart-tile:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+
+  .smart-tile:active { transform: scale(0.98); }
+
+  /* Tile A — Renovation */
+  .tile-reno {
+    background: linear-gradient(135deg, #1a1a0a 0%, #1e1e10 100%);
+    border-color: rgba(200,255,0,0.2);
+  }
+
+  .tile-reno::before {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    right: -20px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(200,255,0,0.08) 0%, transparent 70%);
+  }
+
+  /* Tile B — Installment */
+  .tile-install {
+    background: linear-gradient(135deg, #0e0e1a 0%, #12121e 100%);
+    border-color: rgba(168,85,247,0.25);
+  }
+
+  .tile-install::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    right: -20px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(168,85,247,0.1) 0%, transparent 70%);
+  }
+
+  /* Tile — Travel */
+  .tile-travel {
+    background: linear-gradient(135deg, #100a1a 0%, #140e20 100%);
+    border-color: rgba(168,85,247,0.25);
+  }
+
+  .tile-travel::before {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    right: -10px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(168,85,247,0.1) 0%, transparent 70%);
+  }
+
+  .tile-currency {
+    background: linear-gradient(135deg, #0e1400 0%, #141a00 100%);
+    border-color: rgba(200,255,0,0.25);
+  }
+
+  .tile-emoji {
+    font-size: 28px;
+    margin-bottom: 10px;
+    display: block;
+    line-height: 1;
+  }
+
+  .tile-trigger-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(200,255,0,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(200,255,0,0.2);
+    border-radius: 20px;
+    padding: 3px 9px;
+    font-size: 10px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .tile-trigger-badge.purple {
+    background: var(--purple-dim);
+    color: var(--purple);
+    border-color: rgba(168,85,247,0.25);
+  }
+
+  .tile-trigger-badge.blue {
+    background: var(--purple-dim);
+    color: var(--purple);
+    border-color: rgba(168,85,247,0.3);
+  }
+
+  .tile-trigger-badge.green {
+    background: rgba(34,197,94,0.12);
+    color: #22c55e;
+    border-color: rgba(34,197,94,0.25);
+  }
+
+  .tile-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+    line-height: 1.3;
+  }
+
+  .tile-subtitle {
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+
+  /* Progress bar */
+  .prog-wrap {
+    margin-bottom: 12px;
+  }
+
+  .prog-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+  }
+
+  .prog-spent {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .prog-total {
+    font-size: 12px;
+    color: var(--text3);
+  }
+
+  .prog-bar {
+    height: 5px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .prog-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+  }
+
+  .prog-fill.green { background: var(--accent); }
+  .prog-fill.purple { background: var(--purple); }
+  .prog-fill.blue { background: var(--purple); }
+
+  /* Installment breakdown */
+  .installment-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.04);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .store-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex: 0 0 auto;
+  }
+
+  .install-info { flex: 1; }
+
+  .install-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .install-amount {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .install-parts {
+    text-align: right;
+  }
+
+  .install-per {
+    font-size: 10px;
+    color: var(--text3);
+    margin-bottom: 2px;
+  }
+
+  .install-val {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--purple);
+  }
+
+  /* Currency row */
+  .currency-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .currency-item {
+    flex: 1;
+    background: rgba(255,255,255,0.04);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    text-align: center;
+  }
+
+  .currency-flag { font-size: 18px; margin-bottom: 3px; }
+
+  .currency-code {
+    font-size: 10px;
+    color: var(--text3);
+    margin-bottom: 2px;
+  }
+
+  .currency-rate {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .currency-change {
+    font-size: 10px;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+
+  .currency-change.down { color: var(--purple); }
+
+  /* Tile CTA button */
+  .tile-cta {
+    width: 100%;
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .tile-cta.accent {
+    background: var(--accent);
+    color: #0c0c0e;
+  }
+
+  .tile-cta.accent:hover { background: #d4ff1a; }
+
+  .tile-cta.purple {
+    background: var(--purple-dim);
+    color: var(--purple);
+    border: 1px solid rgba(168,85,247,0.3);
+  }
+
+  .tile-cta.purple:hover { background: rgba(168,85,247,0.2); }
+
+  .tile-cta.blue {
+    background: var(--purple-dim);
+    color: var(--purple);
+    border: 1px solid rgba(168,85,247,0.3);
+  }
+
+  .tile-cta.outline {
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border);
+    margin-top: 6px;
+  }
+
+  /* ── GOALS SCROLL ── */
+  .goals-scroll {
+    display: flex;
+    gap: 10px;
+    padding: 0 16px 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .goals-scroll::-webkit-scrollbar { display: none; }
+
+  .goal-card {
+    flex: 0 0 160px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 14px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .goal-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: 0;
+  }
+
+  .goal-card.green::before { background: var(--accent); }
+  .goal-card.purple::before { background: var(--purple); }
+  .goal-card.blue::before { background: var(--purple); }
+
+  .goal-card:hover {
+    border-color: rgba(255,255,255,0.15);
+    transform: translateY(-2px);
+  }
+
+  .goal-emoji { font-size: 24px; margin-bottom: 8px; display: block; }
+
+  .goal-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .goal-amount {
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 2px;
+  }
+
+  .goal-amount.purple { color: var(--purple); }
+  .goal-amount.blue { color: var(--blue); }
+
+  .goal-total {
+    font-size: 10px;
+    color: var(--text3);
+    margin-bottom: 8px;
+  }
+
+  .goal-progress {
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .goal-progress-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1.2s ease;
+  }
+
+  .goal-progress-fill.green { background: var(--accent); }
+  .goal-progress-fill.purple { background: var(--purple); }
+  .goal-progress-fill.blue { background: var(--purple); }
+
+  .goal-forecast {
+    font-size: 10px;
+    color: var(--text3);
+    line-height: 1.3;
+  }
+
+  .goal-add-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 7px;
+    background: rgba(200,255,0,0.08);
+    border: 1px dashed rgba(200,255,0,0.3);
+    border-radius: 8px;
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: all 0.2s;
+  }
+
+  .goal-add-btn:hover { background: rgba(200,255,0,0.12); }
+
+  .goal-new {
+    flex: 0 0 100px;
+    background: transparent;
+    border-radius: var(--radius);
+    border: 1.5px dashed var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 160px;
+  }
+
+  .goal-new:hover { border-color: var(--accent); background: var(--accent-dim); }
+
+  .goal-new-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid var(--text3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text3);
+    font-size: 18px;
+  }
+
+  .goal-new span {
+    font-size: 11px;
+    color: var(--text3);
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  /* ── CARDS SECTION ── */
+  .card-item {
+    margin: 0 16px 8px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 14px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .card-item:hover { border-color: rgba(255,255,255,0.12); background: var(--surface2); }
+
+  .card-chip {
+    width: 40px;
+    height: 28px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #c8ff00 0%, #a3cc00 100%);
+    flex: 0 0 auto;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-chip::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: rgba(0,0,0,0.1);
+  }
+
+  .card-info { flex: 1; }
+
+  .card-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .star-icon { font-size: 12px; }
+
+  .card-details {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .card-balance {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 10px 0 20px;
+    backdrop-filter: blur(20px);
+    z-index: 50;
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 6px 0;
+    transition: all 0.2s;
+  }
+
+  .nav-item .nav-icon {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--text3);
+    transition: color 0.2s;
+  }
+
+  .nav-item .nav-label {
+    font-size: 10px;
+    color: var(--text3);
+    transition: color 0.2s;
+    font-weight: 500;
+  }
+
+  .nav-item.active .nav-icon,
+  .nav-item.active .nav-label { color: var(--accent); }
+
+  /* ── PERSONA VISIBILITY ── */
+  .reno-only, .travel-only { display: none; }
+  body.persona-reno .reno-only { display: block; }
+  body.persona-reno .travel-only { display: none; }
+  body.persona-travel .travel-only { display: block; }
+  body.persona-travel .reno-only { display: none; }
+
+  /* flex variants */
+  .reno-only-flex, .travel-only-flex { display: none; }
+  body.persona-reno .reno-only-flex { display: flex; }
+  body.persona-travel .travel-only-flex { display: flex; }
+
+
+  /* DEFAULT persona */
+  .default-only { display: none; }
+  .default-only-flex { display: none; }
+  body.persona-default .default-only { display: block; }
+  body.persona-default .default-only-flex { display: flex; }
+  body.persona-default .reno-only { display: none; }
+  body.persona-default .travel-only { display: none; }
+  body.persona-default .reno-only-flex { display: none; }
+  body.persona-default .travel-only-flex { display: none; }
+
+  /* DEFAULT tile */
+  .tile-default {
+    background: linear-gradient(135deg, #0c0c16 0%, #12121e 100%);
+    border-color: rgba(168,85,247,0.2);
+  }
+  .tile-default::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -20px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(168,85,247,0.08) 0%, transparent 70%);
+  }
+
+  .onboarding-card {
+    margin: 0 16px 12px;
+    border-radius: var(--radius);
+    padding: 18px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .onboarding-card::after {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .setup-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .setup-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+  }
+
+  .setup-step:hover { border-color: rgba(200,255,0,0.2); }
+
+  .step-icon {
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex: 0 0 auto;
+  }
+
+  .step-icon.done { background: var(--accent-dim); }
+  .step-icon.pending { background: var(--surface3); }
+
+  .step-text { flex: 1; }
+  .step-title { font-size: 12px; font-weight: 600; color: var(--text); }
+  .step-sub { font-size: 10px; color: var(--text3); margin-top: 1px; }
+
+  .step-check { font-size: 12px; color: var(--accent); }
+  .step-arrow { font-size: 12px; color: var(--text3); }
+
+  .finlit-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .finlit-card {
+    flex: 1;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    border: 1px solid var(--border);
+    cursor: pointer;
+  }
+
+  .finlit-card .ico { font-size: 18px; margin-bottom: 5px; }
+  .finlit-card .lbl { font-size: 10px; color: var(--text3); margin-bottom: 2px; }
+  .finlit-card .val { font-size: 11px; font-weight: 600; color: var(--text); line-height: 1.3; }
+
+  /* ── BOTTOM SHEET ── */
+  .sheet-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0);
+    z-index: 200;
+    pointer-events: none;
+    transition: background 0.3s;
+  }
+
+  .sheet-overlay.open {
+    background: rgba(0,0,0,0.7);
+    pointer-events: all;
+  }
+
+  .bottom-sheet {
+    position: fixed;
+    bottom: -100%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 340px;
+    max-height: 80vh;
+    background: var(--surface);
+    border-radius: 24px 24px 0 0;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-bottom: none;
+    z-index: 201;
+    overflow-y: auto;
+    transition: bottom 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    padding-bottom: 32px;
+  }
+
+  .bottom-sheet.open { bottom: 0; }
+
+  .sheet-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--surface3);
+    border-radius: 2px;
+    margin: 12px auto 0;
+  }
+
+  .sheet-content { padding: 20px; }
+
+  .sheet-title {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .sheet-subtitle {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .schedule-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .sched-info { }
+
+  .sched-date {
+    font-size: 12px;
+    color: var(--text3);
+    margin-bottom: 3px;
+  }
+
+  .sched-num {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .sched-amount {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .sched-row-first .sched-amount { color: var(--purple); }
+
+  .sheet-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px;
+    background: var(--accent-dim);
+    border: 1px solid var(--border-accent);
+    border-radius: var(--radius-sm);
+    margin-top: 14px;
+    margin-bottom: 16px;
+  }
+
+  .sheet-total-label {
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  .sheet-total-val {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .sheet-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--accent);
+    color: #0c0c0e;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+  }
+
+  .sheet-btn:hover { background: #d4ff1a; }
+
+  .sheet-btn.secondary {
+    background: var(--surface2);
+    color: var(--text2);
+    border: 1px solid var(--border);
+  }
+
+  .sheet-btn.secondary:hover { background: var(--surface3); }
+
+  /* ── ANNOTATION PANEL ── */
+  .annotations {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ann-title {
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .ann-block {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    position: relative;
+  }
+
+  .ann-block::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 16px;
+    bottom: 16px;
+    width: 3px;
+    border-radius: 0 2px 2px 0;
+  }
+
+  .ann-block.green::before { background: var(--accent); }
+  .ann-block.purple::before { background: var(--purple); }
+  .ann-block.blue::before { background: var(--purple); }
+  .ann-block.orange::before { background: var(--accent); }
+
+  .ann-block-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+    padding-left: 4px;
+  }
+
+  .ann-block-text {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.6;
+    padding-left: 4px;
+  }
+
+  .ann-tag {
+    display: inline-block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 8px;
+    margin-right: 4px;
+    font-weight: 500;
+  }
+
+  .ann-tag.active {
+    background: var(--accent-dim);
+    border-color: var(--border-accent);
+    color: var(--accent);
+  }
+
+  .ann-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0;
+  }
+
+  .ann-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .ann-comp-card {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .ann-comp-label {
+    font-size: 10px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  .ann-comp-text {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+
+  .ann-comp-card.bad { border-color: rgba(255,71,87,0.2); }
+  .ann-comp-card.bad .ann-comp-label { color: var(--red); }
+
+  .ann-comp-card.good { border-color: var(--border-accent); }
+  .ann-comp-card.good .ann-comp-label { color: var(--accent); }
+
+  /* scroll indicator */
+  .scroll-hint {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text3);
+    padding: 8px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  /* ── PERSONA NAME ── */
+  .persona-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 20px 0;
+  }
+
+  .persona-name .username {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* pulse animation */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(168,85,247,0.12);
+    color: var(--purple);
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 600;
+  }
+
+  .live-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--purple);
+    animation: pulse 1.5s infinite;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .smart-tile, .card-item, .goal-card {
+    animation: slideIn 0.4s ease both;
+  }
+
+  /* warning tile */
+  .tile-warn-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(168,85,247,0.08);
+    border: 1px solid rgba(168,85,247,0.2);
+    border-radius: var(--radius-sm);
+    padding: 8px 10px;
+    margin-bottom: 10px;
+  }
+
+  .tile-warn-icon { font-size: 16px; }
+
+  .tile-warn-text {
+    font-size: 11px;
+    color: var(--text2);
+    line-height: 1.4;
+  }
+
+  .tile-warn-text strong { color: var(--accent); }
+
+  /* mini chart bars */
+  .mini-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 32px;
+    margin-bottom: 10px;
+  }
+
+  .chart-bar {
+    flex: 1;
+    border-radius: 3px 3px 0 0;
+    background: var(--surface3);
+    transition: height 0.3s, background 0.3s;
+  }
+
+  .chart-bar.active { background: var(--accent); }
+  .chart-bar.purple-bar { background: var(--purple); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 760px) {
+    .layout { flex-direction: column; align-items: center; }
+    .annotations { max-width: 340px; width: 100%; }
+    .page-header { padding: 24px 16px 16px; }
+    .persona-bar { padding: 0 16px; }
+    .layout { padding: 0 16px 60px; }
+  }
+</style>
+</head>
+<body class="persona-reno">
+
+<!-- Page Header -->
+<div class="page-header">
+  <div class="page-label">ОТП Банк · To-Be концепт</div>
+  <div class="page-title">Гиперперсонализированная витрина</div>
+  <div class="page-subtitle">Переключайтесь между персонами — экран полностью пересобирается. DEFAULT — нулевое состояние без паттернов.</div>
+</div>
+
+<!-- Persona Switcher -->
+<div class="persona-bar">
+  <button class="persona-btn active" id="btn-reno" onclick="setPersona('reno')">
+    <span class="emoji" style="display:inline-flex;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2.5l3 3L6 17l-3-1 1-3L14.5 2.5z"/><path d="M16 4l2 2"/></svg></span> Ремонтник · Игорь
+  </button>
+  <button class="persona-btn" id="btn-travel" onclick="setPersona('travel')">
+    <span class="emoji" style="display:inline-flex;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L3 10.5l7 2.5 2.5 7L21 3z"/><path d="M10 13l4-4"/></svg></span> Путешественница · Саша
+  </button>
+  <button class="persona-btn" id="btn-default" onclick="setPersona('default')">
+    <span class="emoji" style="display:inline-flex;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span> DEFAULT · Новый пользователь
+  </button>
+</div>
+
+<!-- Layout -->
+<div class="layout">
+
+  <!-- Phone -->
+  <div class="phone-wrap">
+    <div class="phone-frame">
+      <div class="phone-inner" id="phone-scroll">
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span id="status-time">17:45</span>
+          <div class="status-icons">
+            <svg width="16" height="10" viewBox="0 0 16 10" fill="currentColor" opacity="0.8"><rect x="0" y="4" width="3" height="6" rx="1"/><rect x="4" y="2" width="3" height="8" rx="1"/><rect x="8" y="0" width="3" height="10" rx="1"/><rect x="12" y="1" width="3" height="9" rx="1"/></svg>
+            <svg width="14" height="10" viewBox="0 0 14 10" fill="currentColor" opacity="0.8"><path d="M7 2.5C9.2 2.5 11.2 3.4 12.7 4.8L14 3.5C12.2 1.8 9.7 0.8 7 0.8C4.3 0.8 1.8 1.8 0 3.5L1.3 4.8C2.8 3.4 4.8 2.5 7 2.5Z"/><path d="M7 5.5C8.4 5.5 9.7 6 10.7 6.9L12 5.6C10.7 4.5 9 3.8 7 3.8C5 3.8 3.3 4.5 2 5.6L3.3 6.9C4.3 6 5.6 5.5 7 5.5Z"/><circle cx="7" cy="9" r="1.2"/></svg>
+            <svg width="22" height="10" viewBox="0 0 22 10" fill="none" opacity="0.8"><rect x="0.5" y="0.5" width="18" height="9" rx="2.5" stroke="currentColor"/><rect x="2" y="2" width="12" height="6" rx="1.5" fill="currentColor" id="battery-fill"/><path d="M20 3.5C20.8 3.8 21.5 4.3 21.5 5C21.5 5.7 20.8 6.2 20 6.5V3.5Z" fill="currentColor"/></svg>
+          </div>
+        </div>
+
+        <!-- Top Bar -->
+        <div class="top-bar">
+          <div class="otp-logo">
+            <div class="dot"></div>
+            <span><span class="bold">отп</span>банк</span>
+          </div>
+          <div class="top-actions">
+            <div class="theme-toggle">
+              <span style="display:inline-flex;padding:2px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg></span>
+              <span class="active" style="display:inline-flex;padding:2px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></span>
+            </div>
+            <div class="icon-btn" title="Поиск">
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"/></svg>
+            </div>
+            <div class="icon-btn" title="Уведомления" style="position:relative;">
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zm0 16a2 2 0 01-2-2h4a2 2 0 01-2 2z"/></svg>
+              <div style="position:absolute;top:4px;right:4px;width:7px;height:7px;background:var(--purple);border-radius:50%;border:1.5px solid var(--bg);"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Name + live -->
+        <div class="persona-name">
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor" opacity="0.5"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/></svg>
+          <span class="username reno-only">Игорь</span>
+          <span class="username travel-only">Александра</span>
+          <span class="username default-only">Новый пользователь</span>
+          <div class="live-badge"><div class="live-dot"></div> Live</div>
+        </div>
+
+        <!-- Balance Card -->
+        <!-- RENO persona -->
+        <div class="balance-card reno-only" style="margin-top:12px;">
+          <div class="balance-label">Главный счёт *5173</div>
+          <div class="balance-amount">45 600 <span class="currency">₽</span> <span style="display:inline-flex;align-items:center;cursor:pointer;opacity:0.5;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span></div>
+          <div class="card-meta">
+            <div class="mir-badge">МИР</div>
+            <span class="card-num">•• 5173</span>
+          </div>
+          <div class="balance-actions">
+            <div class="action-icon-btn" title="Бонусы">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div class="action-icon-btn" title="QR">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3" rx=".5"/><rect x="18" y="14" width="3" height="3" rx=".5"/><rect x="14" y="18" width="3" height="3" rx=".5"/><rect x="18" y="18" width="3" height="3" rx=".5"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRAVEL persona balance -->
+        <div class="balance-card travel-only" style="margin-top:12px;">
+          <div class="balance-label">Главный счёт *4321</div>
+          <div class="balance-amount">127 300 <span class="currency">₽</span> <span style="display:inline-flex;align-items:center;cursor:pointer;opacity:0.5;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span></div>
+          <div class="card-meta">
+            <div class="mir-badge">МИР</div>
+            <span class="card-num">•• 4321</span>
+          </div>
+          <div class="balance-actions">
+            <div class="action-icon-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <div class="action-icon-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3" rx=".5"/><rect x="18" y="14" width="3" height="3" rx=".5"/><rect x="14" y="18" width="3" height="3" rx=".5"/><rect x="18" y="18" width="3" height="3" rx=".5"/></svg>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- DEFAULT persona balance -->
+        <div class="balance-card default-only" style="margin-top:12px;">
+          <div class="balance-label">Текущий счёт</div>
+          <div class="balance-amount">12 400 <span class="currency">₽</span> <span style="display:inline-flex;align-items:center;cursor:pointer;opacity:0.5;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span></div>
+          <div class="card-meta">
+            <div class="mir-badge">МИР</div>
+            <span class="card-num">Дебетовая</span>
+          </div>
+          <div class="balance-actions">
+            <div class="action-icon-btn" title="Бонусы">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+          </div>
+        </div>
+        <!-- Quick Actions -->
+        <div class="quick-actions" style="margin-top:8px;">
+          <!-- RENO quick actions -->
+          <div class="qa-item reno-only-flex" onclick="openSheet('sbp')">
+            <div class="qa-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16l-4-4 4-4"/><path d="M3 12h14"/><path d="M17 8l4 4-4 4"/><path d="M21 12H7"/></svg></div>
+            <div class="qa-label">Между счетами</div>
+          </div>
+          <div class="qa-item reno-only-flex">
+            <div class="qa-circle avatar">АН</div>
+            <div class="qa-label">Антон</div>
+          </div>
+          <div class="qa-item reno-only-flex">
+            <div class="qa-circle avatar">МА</div>
+            <div class="qa-label">Маша</div>
+          </div>
+          <div class="qa-item reno-only-flex">
+            <div class="qa-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/><path d="M3 21h18"/></svg></div>
+            <div class="qa-label">ЖКУ</div>
+          </div>
+          <div class="qa-item reno-only-flex">
+            <div class="qa-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/></svg></div>
+            <div class="qa-label">Телефон</div>
+          </div>
+
+          <!-- TRAVEL quick actions -->
+          <div class="qa-item travel-only-flex">
+            <div class="qa-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16l-4-4 4-4"/><path d="M3 12h14"/><path d="M17 8l4 4-4 4"/><path d="M21 12H7"/></svg></div>
+            <div class="qa-label">Между счетами</div>
+          </div>
+          <div class="qa-item travel-only-flex">
+            <div class="qa-circle avatar">ПА</div>
+            <div class="qa-label">Паша</div>
+          </div>
+          <div class="qa-item travel-only-flex">
+            <div class="qa-circle avatar">ТА</div>
+            <div class="qa-label">Таня</div>
+          </div>
+          <div class="qa-item travel-only-flex">
+            <div class="qa-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9h.01M15 9h.01"/><path d="M9 15s1.5 2 3 2 3-2 3-2"/></svg></div>
+            <div class="qa-label">Валюта</div>
+          </div>
+          <div class="qa-item travel-only-flex">
+            <div class="qa-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/><path d="M3 21h18"/></svg></div>
+            <div class="qa-label">ЖКУ</div>
+          </div>
+
+
+          <!-- DEFAULT quick actions -->
+          <div class="qa-item default-only-flex">
+            <div class="qa-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16l-4-4 4-4"/><path d="M3 12h14"/><path d="M17 8l4 4-4 4"/><path d="M21 12H7"/></svg></div>
+            <div class="qa-label">Перевод</div>
+          </div>
+          <div class="qa-item default-only-flex">
+            <div class="qa-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/><path d="M3 21h18"/></svg></div>
+            <div class="qa-label">ЖКУ</div>
+          </div>
+          <div class="qa-item default-only-flex">
+            <div class="qa-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><circle cx="12" cy="17" r="1" fill="currentColor" stroke="none"/></svg></div>
+            <div class="qa-label">Телефон</div>
+          </div>
+          <div class="qa-item default-only-flex">
+            <div class="qa-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg></div>
+            <div class="qa-label">Карта</div>
+          </div>
+
+          <!-- Shared -->
+          <div class="qa-item plus">
+            <div class="qa-circle">+</div>
+            <div class="qa-label">Ещё</div>
+          </div>
+        </div>
+
+        <!-- ───── RENO BLOCKS ───── -->
+
+        <!-- Block A — Context tile -->
+        <div class="reno-only">
+          <div class="section-header" style="padding-top:8px;">
+            <div class="section-title">Актуальное</div>
+          </div>
+          <div class="smart-tile tile-reno" onclick="openSheet('reno-a')">
+            <div class="tile-trigger-badge" style="display:inline-flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2.5l3 3L6 17l-3-1 1-3L14.5 2.5z"/></svg> Ремонт активен</div>
+            <div class="tile-title">Ваш ремонт на этой неделе</div>
+            <div class="prog-wrap">
+              <div class="prog-labels">
+                <span class="prog-spent">45 600 ₽</span>
+                <span class="prog-total">лимит 60 000 ₽</span>
+              </div>
+              <div class="prog-bar"><div class="prog-fill green" style="width:76%"></div></div>
+            </div>
+            <div class="mini-chart">
+              <div class="chart-bar" style="height:30%"></div>
+              <div class="chart-bar" style="height:50%"></div>
+              <div class="chart-bar" style="height:40%"></div>
+              <div class="chart-bar" style="height:70%"></div>
+              <div class="chart-bar" style="height:60%"></div>
+              <div class="chart-bar active" style="height:100%"></div>
+              <div class="chart-bar" style="height:20%"></div>
+            </div>
+            <div class="tile-warn-row">
+              <span style="display:inline-flex;align-items:center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="currentColor" stroke="none"/></svg></span>
+              <div class="tile-warn-text">Траты выше обычного на <strong>+34%</strong>. Осталось до лимита: <strong>14 400 ₽</strong></div>
+            </div>
+            <button class="tile-cta accent">Разбить крупную покупку на части</button>
+            <button class="tile-cta outline">Увеличить лимит</button>
+          </div>
+        </div>
+
+        <!-- Block B — Installment tile -->
+        <div class="reno-only">
+          <div class="smart-tile tile-install" onclick="openSheet('reno-b')">
+            <div class="tile-trigger-badge purple" style="display:inline-flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L13.5 8.5H19L14.5 12L16 17.5L12 14L8 17.5L9.5 12L5 8.5H10.5L12 3z" fill="currentColor" stroke="none"/></svg> Умная рассрочка</div>
+            <div class="tile-title">Вернуть деньги за покупку</div>
+            <div class="tile-subtitle">Превратите трату в удобные платежи</div>
+            <div class="installment-row">
+              <div class="store-icon" style="background:#7c3aed;color:white;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1" fill="currentColor" stroke="none"/><circle cx="20" cy="21" r="1" fill="currentColor" stroke="none"/><path d="M1 1h4l2.68 13.39a2 2 0 001.99 1.61h9.72a2 2 0 001.99-1.61L23 6H6"/></svg></div>
+              <div class="install-info">
+                <div class="install-name">Леруа Мерлен</div>
+                <div class="install-amount">32 000 ₽</div>
+              </div>
+              <div class="install-parts">
+                <div class="install-per">4 платежа</div>
+                <div class="install-val">× 8 000 ₽</div>
+              </div>
+            </div>
+            <button class="tile-cta purple">Оформить рассрочку</button>
+          </div>
+        </div>
+
+        <!-- Block C — Goals RENO -->
+        <div class="reno-only">
+          <div class="section-header">
+            <div class="section-title">Ваши цели</div>
+            <div class="section-action">+ Новая</div>
+          </div>
+          <div class="goals-scroll">
+            <div class="goal-card green" onclick="openSheet('goal-reno')">
+              <span class="goal-emoji" style="display:flex;justify-content:center;align-items:center;height:32px;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/><path d="M3 21h18"/></svg></span>
+              <div class="goal-name">Ремонт</div>
+              <div class="goal-amount">103 456 ₽</div>
+              <div class="goal-total">из 453 452 ₽</div>
+              <div class="goal-progress"><div class="goal-progress-fill green" style="width:23%"></div></div>
+              <div class="goal-forecast">Накопите к апрелю 2026</div>
+              <button class="goal-add-btn" onclick="event.stopPropagation()">+ 500 ₽ сегодня</button>
+            </div>
+            <div class="goal-card purple">
+              <span class="goal-emoji" style="display:flex;justify-content:center;align-items:center;height:32px;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L3 10.5l7 2.5 2.5 7L21 3z"/><path d="M10 13l4-4"/></svg></span>
+              <div class="goal-name">Отпуск</div>
+              <div class="goal-amount purple">1 396 ₽</div>
+              <div class="goal-total">из 45 452 ₽</div>
+              <div class="goal-progress"><div class="goal-progress-fill purple" style="width:3%"></div></div>
+              <div class="goal-forecast">1 год 2 мес при темпе</div>
+            </div>
+            <div class="goal-new" onclick="openSheet('new-goal')">
+              <div class="goal-new-icon">+</div>
+              <span>Добавить цель</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───── TRAVEL BLOCKS ───── -->
+
+        <!-- Currency tile -->
+        <div class="travel-only">
+          <div class="section-header" style="padding-top:8px;">
+            <div class="section-title">Актуальное</div>
+          </div>
+          <div class="smart-tile tile-currency" onclick="openSheet('currency')">
+            <div class="tile-trigger-badge green" style="display:inline-flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L3 10.5l7 2.5 2.5 7L21 3z"/></svg> Поездка через 14 дней</div>
+            <div class="tile-title">Курсы валют прямо сейчас</div>
+            <div class="currency-row">
+              <div class="currency-item">
+                <div class="currency-flag">🇺🇸</div>
+                <div class="currency-code">USD</div>
+                <div class="currency-rate">88.4 ₽</div>
+                <div class="currency-change" style="display:flex;align-items:center;gap:2px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg> +0.3</div>
+              </div>
+              <div class="currency-item">
+                <div class="currency-flag">🇪🇺</div>
+                <div class="currency-code">EUR</div>
+                <div class="currency-rate">96.1 ₽</div>
+                <div class="currency-change down" style="display:flex;align-items:center;gap:2px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg> -0.8</div>
+              </div>
+              <div class="currency-item">
+                <div class="currency-flag">🇹🇷</div>
+                <div class="currency-code">TRY</div>
+                <div class="currency-rate">2.71 ₽</div>
+                <div class="currency-change" style="display:flex;align-items:center;gap:2px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg> +0.1</div>
+              </div>
+            </div>
+            <button class="tile-cta blue">Купить валюту по курсу</button>
+          </div>
+        </div>
+
+        <!-- Block B Travel — Installment -->
+        <div class="travel-only">
+          <div class="smart-tile tile-install" onclick="openSheet('travel-b')">
+            <div class="tile-trigger-badge purple" style="display:inline-flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3L13.5 8.5H19L14.5 12L16 17.5L12 14L8 17.5L9.5 12L5 8.5H10.5L12 3z" fill="currentColor" stroke="none"/></svg> Умная рассрочка</div>
+            <div class="tile-title">Вернуть деньги за покупку</div>
+            <div class="tile-subtitle">Большая трата на путешествие</div>
+            <div class="installment-row">
+              <div class="store-icon" style="background:#7c3aed;color:white;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+              <div class="install-info">
+                <div class="install-name">Booking.com · Турция</div>
+                <div class="install-amount">54 000 ₽</div>
+              </div>
+              <div class="install-parts">
+                <div class="install-per">6 платежей</div>
+                <div class="install-val">× 9 000 ₽</div>
+              </div>
+            </div>
+            <button class="tile-cta purple">Оформить рассрочку</button>
+          </div>
+        </div>
+
+        <!-- Insurance tile -->
+        <div class="travel-only">
+          <div class="smart-tile tile-travel" onclick="openSheet('insurance')">
+            <div class="tile-trigger-badge blue" style="display:inline-flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v5c0 5 4 9 9 10 5-1 9-5 9-10V7L12 2z"/></svg> Страховка</div>
+            <div class="tile-title">Защита для путешествия</div>
+            <div class="tile-subtitle">Турция · Вылет 28 марта · 14 дней</div>
+            <div style="display:flex;gap:10px;margin-bottom:12px;">
+              <div style="flex:1;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;text-align:center;">
+                <div style="display:flex;justify-content:center;margin-bottom:5px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2H16v20H8z"/><path d="M2 8h20v8H2z"/></svg></div>
+                <div style="font-size:10px;color:var(--text3);">Мед. помощь</div>
+                <div style="font-size:12px;font-weight:700;color:var(--text);">$50 000</div>
+              </div>
+              <div style="flex:1;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;text-align:center;">
+                <div style="display:flex;justify-content:center;margin-bottom:5px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/></svg></div>
+                <div style="font-size:10px;color:var(--text3);">Багаж</div>
+                <div style="font-size:12px;font-weight:700;color:var(--text);">$1 000</div>
+              </div>
+              <div style="flex:1;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;text-align:center;">
+                <div style="display:flex;justify-content:center;margin-bottom:5px;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L3 10.5l7 2.5 2.5 7L21 3z"/><path d="M10 13l4-4"/></svg></div>
+                <div style="font-size:10px;color:var(--text3);">Отмена</div>
+                <div style="font-size:12px;font-weight:700;color:var(--text);">100%</div>
+              </div>
+            </div>
+            <button class="tile-cta blue">Застраховать за 890 ₽</button>
+          </div>
+        </div>
+
+        <!-- Block C — Goals TRAVEL -->
+        <div class="travel-only">
+          <div class="section-header">
+            <div class="section-title">Ваши цели</div>
+            <div class="section-action">+ Новая</div>
+          </div>
+          <div class="goals-scroll">
+            <div class="goal-card blue" onclick="openSheet('goal-travel')">
+              <span class="goal-emoji" style="display:flex;justify-content:center;align-items:center;height:32px;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M12 12c0-4-4-8-4-8s0 4 4 4"/><path d="M12 12c0-4 4-8 4-8s0 4-4 4"/><path d="M8 16c-2 0-4-2-4-4s2-2 4-2"/><path d="M16 16c2 0 4-2 4-4s-2-2-4-2"/></svg></span>
+              <div class="goal-name">Отпуск в Турции</div>
+              <div class="goal-amount blue">84 000 ₽</div>
+              <div class="goal-total">из 150 000 ₽</div>
+              <div class="goal-progress"><div class="goal-progress-fill blue" style="width:56%"></div></div>
+              <div class="goal-forecast">Накопите к августу 2025</div>
+              <button class="goal-add-btn" onclick="event.stopPropagation(); this.style.display='none'; this.insertAdjacentHTML('afterend','<div style=\'font-size:11px;color:var(--accent);text-align:center;padding-top:4px;\'>✓ +500 ₽ добавлено</div>')">+ 500 ₽ сегодня</button>
+            </div>
+            <div class="goal-card purple">
+              <span class="goal-emoji" style="display:flex;justify-content:center;align-items:center;height:32px;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="11" width="22" height="8" rx="2"/><path d="M5 11l2-6h10l2 6"/><circle cx="7" cy="19" r="2" fill="currentColor" stroke="none"/><circle cx="17" cy="19" r="2" fill="currentColor" stroke="none"/></svg></span>
+              <div class="goal-name">Машина</div>
+              <div class="goal-amount purple">230 000 ₽</div>
+              <div class="goal-total">из 1 200 000 ₽</div>
+              <div class="goal-progress"><div class="goal-progress-fill purple" style="width:19%"></div></div>
+              <div class="goal-forecast">3 года 8 мес при темпе</div>
+            </div>
+            <div class="goal-new" onclick="openSheet('new-goal')">
+              <div class="goal-new-icon">+</div>
+              <span>Добавить цель</span>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ───── DEFAULT BLOCKS ───── -->
+
+        <!-- DEFAULT: onboarding / product offer -->
+        <div class="default-only">
+          <div class="section-header" style="padding-top:8px;">
+            <div class="section-title">Актуальное</div>
+          </div>
+          <!-- Product offer tile -->
+          <div class="smart-tile tile-default" onclick="openSheet('default-card')">
+            <div class="tile-trigger-badge purple" style="display:inline-flex;align-items:center;gap:5px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> Начните пользоваться</div>
+            <div class="tile-title">Кредитная карта — уже одобрена</div>
+            <div class="tile-subtitle">Лимит до 150 000 ₽ · 0% на 120 дней · без визита</div>
+            <div style="display:flex;gap:8px;margin-bottom:12px;">
+              <div style="flex:1;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;text-align:center;">
+                <div style="display:flex;justify-content:center;margin-bottom:5px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+                <div style="font-size:9px;color:var(--text3);">Лимит</div>
+                <div style="font-size:12px;font-weight:700;color:var(--text);">150 000 ₽</div>
+              </div>
+              <div style="flex:1;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;text-align:center;">
+                <div style="display:flex;justify-content:center;margin-bottom:5px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></div>
+                <div style="font-size:9px;color:var(--text3);">Кэшбэк</div>
+                <div style="font-size:12px;font-weight:700;color:var(--text);">до 10%</div>
+              </div>
+              <div style="flex:1;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;text-align:center;">
+                <div style="display:flex;justify-content:center;margin-bottom:5px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+                <div style="font-size:9px;color:var(--text3);">Рассрочка</div>
+                <div style="font-size:12px;font-weight:700;color:var(--text);">120 дней</div>
+              </div>
+            </div>
+            <button class="tile-cta accent">Оформить за 2 минуты</button>
+            <button class="tile-cta outline">Посмотреть детали</button>
+          </div>
+        </div>
+
+        <!-- DEFAULT: setup checklist -->
+        <div class="default-only">
+          <div class="section-header">
+            <div class="section-title">Настройте приложение</div>
+            <div class="section-action">3 шага</div>
+          </div>
+          <div class="onboarding-card">
+            <div class="setup-steps">
+              <div class="setup-step" onclick="openSheet('setup-push')">
+                <div class="step-icon done"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></div>
+                <div class="step-text">
+                  <div class="step-title">Включить уведомления</div>
+                  <div class="step-sub">Напомним об оплате ЖКУ и крупных тратах</div>
+                </div>
+                <span class="step-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+              </div>
+              <div class="setup-step" onclick="openSheet('setup-template')">
+                <div class="step-icon pending"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/></svg></div>
+                <div class="step-text">
+                  <div class="step-title">Добавить шаблоны платежей</div>
+                  <div class="step-sub">ЖКХ, телефон, интернет — в 1 тап</div>
+                </div>
+                <span class="step-arrow">›</span>
+              </div>
+              <div class="setup-step" onclick="openSheet('setup-goal')">
+                <div class="step-icon pending"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg></div>
+                <div class="step-text">
+                  <div class="step-title">Создать первую цель</div>
+                  <div class="step-sub">Подушка безопасности, отпуск, техника</div>
+                </div>
+                <span class="step-arrow">›</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DEFAULT: financial literacy -->
+        <div class="default-only">
+          <div class="section-header">
+            <div class="section-title">Финграмотность</div>
+            <div class="section-action">Все советы</div>
+          </div>
+          <div style="margin: 0 16px 12px;">
+            <div class="finlit-row">
+              <div class="finlit-card" onclick="openSheet('finlit-1')">
+                <div class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+                <div class="lbl">Совет дня</div>
+                <div class="val">Правило 50/30/20 для контроля бюджета</div>
+              </div>
+              <div class="finlit-card" onclick="openSheet('finlit-2')">
+                <div class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v5c0 5 4 9 9 10 5-1 9-5 9-10V7L12 2z"/></svg></div>
+                <div class="lbl">Безопасность</div>
+                <div class="val">Как защитить карту от мошенников</div>
+              </div>
+            </div>
+            <div style="padding:10px 12px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border);">
+              <div style="font-size:9px;color:var(--text3);margin-bottom:3px;">ПОДСКАЗКА</div>
+              <div style="font-size:12px;color:var(--text2);line-height:1.5;">Добавьте <strong style="color:var(--text);">3 регулярных платежа</strong> в шаблоны — и витрина автоматически настроится под ваши сценарии</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DEFAULT: goals — empty state -->
+        <div class="default-only">
+          <div class="section-header">
+            <div class="section-title">Мои цели</div>
+            <div class="section-action" style="color:var(--accent)">+ Создать</div>
+          </div>
+          <div style="margin:0 16px 16px;padding:24px 16px;background:var(--surface);border-radius:var(--radius);border:1.5px dashed var(--border);text-align:center;cursor:pointer;" onclick="openSheet('new-goal')">
+            <div style="display:flex;justify-content:center;margin-bottom:12px;"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/></svg></div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">Создайте первую цель</div>
+            <div style="font-size:11px;color:var(--text3);line-height:1.5;">Подушка безопасности, отпуск,<br>новый телефон или машина</div>
+            <button class="tile-cta accent" style="margin-top:14px;max-width:200px;margin-left:auto;margin-right:auto;display:block;">Создать цель</button>
+          </div>
+        </div>
+
+        <!-- ── Cards section (shared) ── -->
+        <div class="section-header">
+          <div class="section-title">Карты</div>
+          <div class="section-action" style="color:var(--accent)">Оформить</div>
+        </div>
+
+        <div class="card-item">
+          <div class="card-chip"></div>
+          <div class="card-info">
+            <div class="card-name">
+              <span class="reno-only">ОТП Карта *5173</span>
+              <span class="travel-only">ОТП Карта *4321</span>
+              <span class="star-icon" style="display:inline-flex;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+            </div>
+            <div class="card-details">
+              <div class="mir-badge">МИР</div>
+              <span class="card-balance reno-only">45 600 ₽</span>
+              <span class="card-balance travel-only">127 300 ₽</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom padding spacer -->
+        <div style="height:16px;"></div>
+
+      </div><!-- /phone-inner -->
+
+      <!-- Bottom Nav -->
+      <div class="bottom-nav">
+        <div class="nav-item active">
+          <div class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/><path d="M3 21h18"/></svg></div>
+          <div class="nav-label">Мой банк</div>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="nav-label">История</div>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg></div>
+          <div class="nav-label">Платежи</div>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+          <div class="nav-label">Чаты</div>
+        </div>
+        <div class="nav-item">
+          <div class="nav-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></div>
+          <div class="nav-label">Оформить</div>
+        </div>
+      </div>
+
+    </div><!-- /phone-frame -->
+  </div><!-- /phone-wrap -->
+
+  <!-- Annotations -->
+  <div class="annotations">
+    <div class="ann-title" id="ann-title-label">Комментарий к концепту</div>
+
+    <!-- ── RENO annotations ── -->
+    <div id="ann-reno">
+      <div class="ann-block green">
+        <div class="ann-block-title" style="display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg> Блок А — Ситуативный контекст</div>
+        <div class="ann-block-text">
+          Плитка «Ваш ремонт» появляется <strong>только при триггере</strong>: траты по MCC 5211/5200 (стройматериалы) превысили 20 000 ₽ за неделю. Показывает реальные цифры Игоря — сколько потратил, сколько осталось до лимита. Мини-гистограмма — это динамика трат по дням. Никакой рекламы, только данные.
+        </div>
+        <span class="ann-tag active">MCC 5211 / 5200</span>
+        <span class="ann-tag active">Триггер: &gt; 20 000 ₽/нед</span>
+        <span class="ann-tag">Нет триггера → блок скрыт</span>
+      </div>
+
+      <div class="ann-block purple">
+        <div class="ann-block-title" style="display:flex;align-items:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Блок Б — Умная рассрочка</div>
+        <div class="ann-block-text">
+          Появляется автоматически после крупной покупки &gt; 15 000 ₽. Здесь — Леруа Мерлен, 32 000 ₽. Банк сам предлагает разбить эту конкретную трату на 4 части. Тап по плитке → Bottom Sheet с графиком платежей. Никакого перехода «в другой мир» — всё в одном контексте.
+        </div>
+        <span class="ann-tag active">Покупка &gt; 15 000 ₽</span>
+        <span class="ann-tag active">Расчёт мгновенный</span>
+        <span class="ann-tag">Tap → bottom sheet</span>
+      </div>
+
+      <div class="ann-block blue">
+        <div class="ann-block-title" style="display:flex;align-items:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg> Блок В — Прогресс-цели</div>
+        <div class="ann-block-text">
+          У Игоря две цели: основная — ремонт (23% выполнено), второстепенная — отпуск. Прогноз срока считается на основе среднего темпа пополнений. Кнопка «+ 500 ₽ сегодня» активна, если алгоритм нашёл «свободные» деньги — остаток после обязательных трат за день.
+        </div>
+        <span class="ann-tag active">Прогноз срока</span>
+        <span class="ann-tag active">Динамический остаток</span>
+        <span class="ann-tag">Быстрое пополнение</span>
+      </div>
+
+      <div class="ann-divider"></div>
+
+      <div class="ann-title">AS IS vs TO-BE · Игорь</div>
+      <div class="ann-comparison">
+        <div class="ann-comp-card bad">
+          <div class="ann-comp-label">AS IS — было</div>
+          <div class="ann-comp-text">Баннер «Оформите кредит наличными». Игорь делает ремонт — но банк об этом не знает и не реагирует.</div>
+        </div>
+        <div class="ann-comp-card good">
+          <div class="ann-comp-label">TO-BE — стало</div>
+          <div class="ann-comp-text">Экран знает, что Игорь тратит на стройматериалы, и предлагает рассрочку на конкретную покупку в Леруа.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TRAVEL annotations ── -->
+    <div id="ann-travel" style="display:none;">
+      <div class="ann-block green">
+        <div class="ann-block-title" style="display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16l-4-4 4-4"/><path d="M3 12h14M17 8l4 4-4 4"/><path d="M21 12H7"/></svg> Блок А — Валютный контекст</div>
+        <div class="ann-block-text">
+          Плитка появляется, потому что у Саши в календаре (или по истории трат) зафиксирована поездка через 14 дней. Триггер: авиабилеты или бронирование отеля за рубежом. Банк показывает актуальные курсы и подсвечивает выгодный момент для покупки TRY — без назойливой рекламы.
+        </div>
+        <span class="ann-tag active">Триггер: бронь за рубежом</span>
+        <span class="ann-tag active">Курс в реальном времени</span>
+        <span class="ann-tag">Нет поездки → блок скрыт</span>
+      </div>
+
+      <div class="ann-block purple">
+        <div class="ann-block-title" style="display:flex;align-items:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Блок Б — Умная рассрочка</div>
+        <div class="ann-block-text">
+          Та же механика, что у Игоря — но триггер другой: крупная трата на Booking.com (54 000 ₽). Банк знает, что это путешествие, и предлагает 6 платежей вместо 4. Расчёт готов — никаких анкет и звонков. Тап → Bottom Sheet с графиком.
+        </div>
+        <span class="ann-tag active">Booking.com &gt; 15 000 ₽</span>
+        <span class="ann-tag active">6 платежей без переплат</span>
+        <span class="ann-tag">Tap → bottom sheet</span>
+      </div>
+
+      <div class="ann-block blue" style="border-color:rgba(59,130,246,0.3);">
+        <div class="ann-block-title" style="display:flex;align-items:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v5c0 5 4 9 9 10 5-1 9-5 9-10V7L12 2z"/></svg> Блок Б.2 — Страховка</div>
+        <div class="ann-block-text">
+          Дополнительный блок, которого вообще нет у Игоря. Появляется только у тех, кто летит за рубеж. Саша видит готовый пакет с суммой покрытия — не надо идти на сайт страховой. Банк уже знает страну и даты из бронирования.
+        </div>
+        <span class="ann-tag active">Страна из бронирования</span>
+        <span class="ann-tag">Только для travel-персоны</span>
+      </div>
+
+      <div class="ann-block blue">
+        <div class="ann-block-title" style="display:flex;align-items:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg> Блок В — Прогресс-цели</div>
+        <div class="ann-block-text">
+          У Саши главная цель — отпуск (56% выполнено, осталось 66 000 ₽). Прогноз «накопите к августу» — это не маркетинг, это математика на основе среднемесячных пополнений. Вторая цель — машина, прогресс скромнее. Кнопка «+ 500 ₽» активна сегодня.
+        </div>
+        <span class="ann-tag active">56% к отпуску</span>
+        <span class="ann-tag active">Прогноз: август 2025</span>
+        <span class="ann-tag">Быстрое пополнение</span>
+      </div>
+
+      <div class="ann-divider"></div>
+
+      <div class="ann-title">AS IS vs TO-BE · Саша</div>
+      <div class="ann-comparison">
+        <div class="ann-comp-card bad">
+          <div class="ann-comp-label">AS IS — было</div>
+          <div class="ann-comp-text">Тот же баннер «Оформите кредит». Саша купила билеты — банк ничего не заметил и не помог ни со страховкой, ни с валютой.</div>
+        </div>
+        <div class="ann-comp-card good">
+          <div class="ann-comp-label">TO-BE — стало</div>
+          <div class="ann-comp-text">Экран Саши: курсы валют + страховка + рассрочка на отель. Всё контекстно. Игорь это не видит — ему незачем.</div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ── DEFAULT annotations ── -->
+    <div id="ann-default" style="display:none;">
+      <div class="ann-block purple">
+        <div class="ann-block-title" style="display:flex;align-items:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg> DEFAULT — нулевое состояние</div>
+        <div class="ann-block-text">
+          Витрина при первом входе или когда алгоритм не определил активную жизненную ситуацию. Нет ремонта, нет поездки, нет регулярных накоплений. Показываем одобренный продукт + онбординг.
+        </div>
+        <span class="ann-tag active">Нет MCC-паттерна</span>
+        <span class="ann-tag">Базовый режим</span>
+      </div>
+
+      <div class="ann-block green">
+        <div class="ann-block-title" style="display:flex;align-items:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Блок А — Одобренный продукт</div>
+        <div class="ann-block-text">
+          Вместо рекламного баннера — персональное одобренное предложение. Система уже проверила клиента и показывает конкретный лимит. Кнопка «Оформить за 2 минуты» → Bottom Sheet с деталями.
+        </div>
+        <span class="ann-tag active">Персональное одобрение</span>
+        <span class="ann-tag">Tap → bottom sheet</span>
+      </div>
+
+      <div class="ann-block green">
+        <div class="ann-block-title" style="display:flex;align-items:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Блок Б — Онбординг-чеклист</div>
+        <div class="ann-block-text">
+          3 шага настройки — уведомления, шаблоны платежей, первая цель. Первый шаг уже выполнен (✓). Это не реклама — это помощь новому пользователю освоиться. Каждый шаг ведёт в Bottom Sheet.
+        </div>
+        <span class="ann-tag active">Прогресс 1 из 3</span>
+        <span class="ann-tag">Снижает отток новых</span>
+      </div>
+
+      <div class="ann-block purple">
+        <div class="ann-block-title" style="display:flex;align-items:center;gap:6px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg> Блок В — Финграмотность</div>
+        <div class="ann-block-text">
+          Пока транзакций мало — показываем полезный контент. Правило 50/30/20, советы по безопасности. Это сервисная функция, не реклама. По мере накопления данных блок замещается ситуативными плитками.
+        </div>
+        <span class="ann-tag active">Временный блок</span>
+        <span class="ann-tag">Уступает место ситуации</span>
+      </div>
+
+      <div class="ann-divider"></div>
+
+      <div class="ann-title">DEFAULT vs Ремонтник vs Путешественница</div>
+      <div class="ann-comparison">
+        <div class="ann-comp-card bad">
+          <div class="ann-comp-label">DEFAULT — было бы</div>
+          <div class="ann-comp-text">Тот же экран, что у всех. Нет персонализации. Новый пользователь уходит, не поняв ценности приложения.</div>
+        </div>
+        <div class="ann-comp-card good">
+          <div class="ann-comp-label">DEFAULT TO-BE</div>
+          <div class="ann-comp-text">Онбординг + одобренный продукт + советы. Как только система видит паттерн — экран перестраивается.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;" class="ann-block orange">
+      <div class="ann-block-title" style="display:flex;align-items:center;gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.78 7.78 5.5 5.5 0 0111.55-3.9L21 2"/><path d="M11 6L5 12l1 1m11-11l-2 2"/></svg> Главный принцип концепта</div>
+      <div class="ann-block-text">
+        Если экран Игоря и экран Саши выглядят одинаково — дизайн провалился. Плитка — это не картинка с призывом, это мини-отчёт с кнопкой действия. Попробуйте тапнуть по любой плитке — откроется Bottom Sheet с деталями без перехода на новый экран.
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ───── BOTTOM SHEETS ───── -->
+<!-- DEFAULT card sheet -->
+<div class="bottom-sheet" id="sheet-default-card">
+  <div class="sheet-handle"></div>
+  <div class="sheet-content">
+    <div class="sheet-title">Кредитная карта ОТП</div>
+    <div class="sheet-subtitle">Персональное одобрение · Без справок и визита в офис</div>
+    <div class="schedule-row sched-row-first">
+      <div class="sched-info"><div class="sched-date">Льготный период</div><div class="sched-num">0% на покупки</div></div>
+      <div class="sched-amount">120 дней</div>
+    </div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">Лимит</div><div class="sched-num">Персональный</div></div>
+      <div class="sched-amount" style="color:var(--text);">до 150 000 ₽</div>
+    </div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">Кэшбэк</div><div class="sched-num">На все категории</div></div>
+      <div class="sched-amount" style="color:var(--text);">до 10%</div>
+    </div>
+    <div class="sheet-total">
+      <span class="sheet-total-label">Оформление занимает</span>
+      <span class="sheet-total-val">2 минуты</span>
+    </div>
+    <button class="sheet-btn" onclick="closeSheet()">Оформить карту</button>
+    <button class="sheet-btn secondary" onclick="closeSheet()">Напомнить позже</button>
+  </div>
+</div>
+
+<!-- DEFAULT finlit 1 sheet -->
+<div class="bottom-sheet" id="sheet-finlit-1">
+  <div class="sheet-handle"></div>
+  <div class="sheet-content">
+    <div class="sheet-title">Правило 50/30/20</div>
+    <div class="sheet-subtitle">Простой способ распределить доходы без таблиц</div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">50% дохода</div><div class="sched-num">Обязательные расходы</div></div>
+      <div class="sched-amount" style="color:var(--text);">ЖКУ, еда, транспорт</div>
+    </div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">30% дохода</div><div class="sched-num">Личные желания</div></div>
+      <div class="sched-amount" style="color:var(--text);">Развлечения, кафе</div>
+    </div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">20% дохода</div><div class="sched-num">Накопления и цели</div></div>
+      <div class="sched-amount">Вклад / цель</div>
+    </div>
+    <button class="sheet-btn" onclick="closeSheet()">Создать цель накопления</button>
+    <button class="sheet-btn secondary" onclick="closeSheet()">Другие советы</button>
+  </div>
+</div>
+
+<!-- DEFAULT setup-goal sheet -->
+<div class="bottom-sheet" id="sheet-setup-goal">
+  <div class="sheet-handle"></div>
+  <div class="sheet-content">
+    <div class="sheet-title">Создать цель</div>
+    <div class="sheet-subtitle">Выберите, на что хотите накопить</div>
+    <div class="schedule-row" onclick="closeSheet()" style="cursor:pointer;">
+      <div class="sched-info"><div class="sched-date">Популярное</div><div class="sched-num" style="display:flex;align-items:center;gap:5px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v5c0 5 4 9 9 10 5-1 9-5 9-10V7L12 2z"/></svg> Подушка безопасности</div></div>
+      <div class="sched-amount" style="color:var(--accent);">3–6 месяцев расходов</div>
+    </div>
+    <div class="schedule-row" onclick="closeSheet()" style="cursor:pointer;">
+      <div class="sched-info"><div class="sched-date">Популярное</div><div class="sched-num" style="display:flex;align-items:center;gap:5px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3L3 10.5l7 2.5 2.5 7L21 3z"/><path d="M10 13l4-4"/></svg> Отпуск</div></div>
+      <div class="sched-amount" style="color:var(--text);">от 50 000 ₽</div>
+    </div>
+    <div class="schedule-row" onclick="closeSheet()" style="cursor:pointer;">
+      <div class="sched-info"><div class="sched-date">Своё</div><div class="sched-num" style="display:flex;align-items:center;gap:5px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg> Своя цель</div></div>
+      <div class="sched-amount" style="color:var(--text);">любая сумма</div>
+    </div>
+    <button class="sheet-btn" onclick="closeSheet()">Создать свою цель</button>
+  </div>
+</div>
+
+<div class="sheet-overlay" id="overlay" onclick="closeSheet()"></div>
+
+<!-- Reno A sheet -->
+<div class="bottom-sheet" id="sheet-reno-a">
+  <div class="sheet-handle"></div>
+  <div class="sheet-content">
+    <div class="sheet-title">Ваш ремонт — детали</div>
+    <div class="sheet-subtitle">Траты на стройматериалы за эту неделю по вашим картам</div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">Пн, 10 марта</div><div class="sched-num">Леруа Мерлен</div></div>
+      <div class="sched-amount">32 000 ₽</div>
+    </div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">Ср, 12 марта</div><div class="sched-num">OBI</div></div>
+      <div class="sched-amount">8 400 ₽</div>
+    </div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">Пт, 14 марта</div><div class="sched-num">ВсёИнструменты</div></div>
+      <div class="sched-amount">5 200 ₽</div>
+    </div>
+    <div class="sheet-total">
+      <span class="sheet-total-label">Итого за неделю</span>
+      <span class="sheet-total-val">45 600 ₽</span>
+    </div>
+    <button class="sheet-btn" onclick="closeSheet()">Разбить Леруа на рассрочку</button>
+    <button class="sheet-btn secondary" onclick="closeSheet()">Увеличить лимит категории</button>
+  </div>
+</div>
+
+<!-- Reno B sheet -->
+<div class="bottom-sheet" id="sheet-reno-b">
+  <div class="sheet-handle"></div>
+  <div class="sheet-content">
+    <div class="sheet-title">Рассрочка на 32 000 ₽</div>
+    <div class="sheet-subtitle">Леруа Мерлен · Покупка 10 марта · Делим на 4 платежа без переплат</div>
+    <div class="schedule-row sched-row-first">
+      <div class="sched-info"><div class="sched-date">15 апреля</div><div class="sched-num">Платёж 1 из 4</div></div>
+      <div class="sched-amount">8 000 ₽</div>
+    </div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">15 мая</div><div class="sched-num">Платёж 2 из 4</div></div>
+      <div class="sched-amount" style="color:var(--text);">8 000 ₽</div>
+    </div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">15 июня</div><div class="sched-num">Платёж 3 из 4</div></div>
+      <div class="sched-amount" style="color:var(--text);">8 000 ₽</div>
+    </div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">15 июля</div><div class="sched-num">Платёж 4 из 4</div></div>
+      <div class="sched-amount" style="color:var(--text);">8 000 ₽</div>
+    </div>
+    <div class="sheet-total">
+      <span class="sheet-total-label">Итого с переплатой</span>
+      <span class="sheet-total-val" style="color:var(--accent);">32 000 ₽ · 0%</span>
+    </div>
+    <button class="sheet-btn" onclick="closeSheet()">Оформить рассрочку</button>
+    <button class="sheet-btn secondary" onclick="closeSheet()">Отмена</button>
+  </div>
+</div>
+
+<!-- Travel B sheet -->
+<div class="bottom-sheet" id="sheet-travel-b">
+  <div class="sheet-handle"></div>
+  <div class="sheet-content">
+    <div class="sheet-title">Рассрочка на 54 000 ₽</div>
+    <div class="sheet-subtitle">Booking.com · Турция · Делим на 6 платежей</div>
+    <div class="schedule-row sched-row-first">
+      <div class="sched-info"><div class="sched-date">15 апреля</div><div class="sched-num">Платёж 1 из 6</div></div>
+      <div class="sched-amount">9 000 ₽</div>
+    </div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">15 мая</div><div class="sched-num">Платёж 2 из 6</div></div>
+      <div class="sched-amount" style="color:var(--text);">9 000 ₽</div>
+    </div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">15 июня</div><div class="sched-num">Платёж 3–6</div></div>
+      <div class="sched-amount" style="color:var(--text);">× 9 000 ₽</div>
+    </div>
+    <div class="sheet-total">
+      <span class="sheet-total-label">Итого · переплата</span>
+      <span class="sheet-total-val">54 000 ₽ · 0%</span>
+    </div>
+    <button class="sheet-btn" onclick="closeSheet()">Оформить рассрочку</button>
+    <button class="sheet-btn secondary" onclick="closeSheet()">Отмена</button>
+  </div>
+</div>
+
+<!-- Currency sheet -->
+<div class="bottom-sheet" id="sheet-currency">
+  <div class="sheet-handle"></div>
+  <div class="sheet-content">
+    <div class="sheet-title">Купить валюту</div>
+    <div class="sheet-subtitle">Турция через 14 дней. Курс сейчас выгодный по TRY — EUR немного упал.</div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">Рекомендовано</div><div class="sched-num" style="display:flex;align-items:center;gap:5px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21h6M12 3a6 6 0 016 6c0 2.4-1.4 4.5-3 5.7V17H9v-2.3C7.4 13.5 6 11.4 6 9a6 6 0 016-6z"/></svg> Купить TRY сейчас</div></div>
+      <div class="sched-amount" style="color:#22c55e;">2.71 ₽</div>
+    </div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">Нейтрально</div><div class="sched-num">USD · стабильно</div></div>
+      <div class="sched-amount" style="color:var(--text);">88.4 ₽</div>
+    </div>
+    <button class="sheet-btn" onclick="closeSheet()">Перейти к обмену</button>
+    <button class="sheet-btn secondary" onclick="closeSheet()">Поставить уведомление</button>
+  </div>
+</div>
+
+<!-- Goal reno sheet -->
+<div class="bottom-sheet" id="sheet-goal-reno">
+  <div class="sheet-handle"></div>
+  <div class="sheet-content">
+    <div class="sheet-title" style="display:flex;align-items:center;gap:8px;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12L12 3l9 9"/><path d="M9 21V12h6v9"/><path d="M3 21h18"/></svg> Цель «Ремонт»</div>
+    <div class="sheet-subtitle">При темпе 10 000 ₽/мес накопите к апрелю 2026</div>
+    <div class="prog-wrap" style="margin:16px 0;">
+      <div class="prog-labels">
+        <span class="prog-spent">103 456 ₽</span>
+        <span class="prog-total">из 453 452 ₽</span>
+      </div>
+      <div class="prog-bar" style="height:8px;"><div class="prog-fill green" style="width:23%"></div></div>
+    </div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">При +10 000 ₽/мес</div><div class="sched-num">Апрель 2026</div></div>
+      <div class="sched-amount" style="color:var(--accent);">35 мес</div>
+    </div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">При +20 000 ₽/мес</div><div class="sched-num">Август 2025</div></div>
+      <div class="sched-amount" style="color:#22c55e;">18 мес</div>
+    </div>
+    <button class="sheet-btn" onclick="closeSheet()">Пополнить сейчас</button>
+    <button class="sheet-btn secondary" onclick="closeSheet()">Изменить сумму цели</button>
+  </div>
+</div>
+
+<!-- Goal travel sheet -->
+<div class="bottom-sheet" id="sheet-goal-travel">
+  <div class="sheet-handle"></div>
+  <div class="sheet-content">
+    <div class="sheet-title" style="display:flex;align-items:center;gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M12 12c0-4-4-8-4-8s0 4 4 4"/><path d="M12 12c0-4 4-8 4-8s0 4-4 4"/><path d="M8 16c-2 0-4-2-4-4s2-2 4-2"/><path d="M16 16c2 0 4-2 4-4s-2-2-4-2"/></svg> Отпуск в Турции</div>
+    <div class="sheet-subtitle">Осталось 66 000 ₽. При текущем темпе — август 2025</div>
+    <div class="prog-wrap" style="margin:16px 0;">
+      <div class="prog-labels">
+        <span class="prog-spent" style="color:var(--blue);">84 000 ₽</span>
+        <span class="prog-total">из 150 000 ₽</span>
+      </div>
+      <div class="prog-bar" style="height:8px;"><div class="prog-fill blue" style="width:56%"></div></div>
+    </div>
+    <div class="schedule-row">
+      <div class="sched-info"><div class="sched-date">Осталось накопить</div><div class="sched-num">66 000 ₽</div></div>
+      <div class="sched-amount" style="color:var(--blue);">56%</div>
+    </div>
+    <button class="sheet-btn" onclick="closeSheet()">Пополнить цель</button>
+    <button class="sheet-btn secondary" onclick="closeSheet()">Взять кредит на остаток</button>
+  </div>
+</div>
+
+<script>
+  function setPersona(p) {
+    document.body.className = 'persona-' + p;
+    document.getElementById('btn-reno').classList.toggle('active', p === 'reno');
+    document.getElementById('btn-travel').classList.toggle('active', p === 'travel');
+    document.getElementById('btn-default').classList.toggle('active', p === 'default');
+    document.getElementById('ann-reno').style.display = p === 'reno' ? 'block' : 'none';
+    document.getElementById('ann-travel').style.display = p === 'travel' ? 'block' : 'none';
+    document.getElementById('ann-default').style.display = p === 'default' ? 'block' : 'none';
+    document.getElementById('phone-scroll').scrollTop = 0;
+  }
+
+  let currentSheet = null;
+
+  function openSheet(id) {
+    if (currentSheet) {
+      document.getElementById('sheet-' + currentSheet).classList.remove('open');
+    }
+    const el = document.getElementById('sheet-' + id);
+    if (!el) return;
+    currentSheet = id;
+    el.classList.add('open');
+    document.getElementById('overlay').classList.add('open');
+  }
+
+  function closeSheet() {
+    if (currentSheet) {
+      document.getElementById('sheet-' + currentSheet).classList.remove('open');
+      currentSheet = null;
+    }
+    document.getElementById('overlay').classList.remove('open');
+  }
+
+  // Animate progress bars on load and persona switch
+  function animateBars() {
+    document.querySelectorAll('.prog-fill, .goal-progress-fill').forEach(el => {
+      const w = el.style.width;
+      el.style.width = '0%';
+      setTimeout(() => { el.style.width = w; }, 100);
+    });
+  }
+
+  animateBars();
+
+  document.getElementById('btn-reno').addEventListener('click', () => setTimeout(animateBars, 50));
+  document.getElementById('btn-travel').addEventListener('click', () => setTimeout(animateBars, 50));
+  document.getElementById('btn-default').addEventListener('click', () => setTimeout(animateBars, 50));
+
+  // Live time
+  function updateTime() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    document.getElementById('status-time').textContent = h + ':' + m;
+  }
+  updateTime();
+  setInterval(updateTime, 30000);
+
+  // Touch/swipe to close sheet
+  let touchStartY = 0;
+  document.querySelectorAll('.bottom-sheet').forEach(sheet => {
+    sheet.addEventListener('touchstart', e => { touchStartY = e.touches[0].clientY; });
+    sheet.addEventListener('touchend', e => {
+      if (e.changedTouches[0].clientY - touchStartY > 60) closeSheet();
+    });
+  });
+</script>
+</body>
+</html>
